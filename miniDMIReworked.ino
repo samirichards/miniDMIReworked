@@ -17,8 +17,11 @@ Adafruit_SSD1306 display(OLED_RESET);
 //Settings for DMI
 const char* ssid = "Sami's iPhone";
 const char* password = "password101";
-std::string stationCode = "HNX";
+std::string stationCode = "LIV";
 //End of settings
+
+BearSSL::WiFiClientSecure secureClient;
+HTTPClient http;
 
 //Methods to do with networking---------
 
@@ -47,23 +50,22 @@ void connectToNetwork() {
 bool getDepartures(){
   //Only proceed if the WiFi connection is still alive
   if(WiFi.status() == WL_CONNECTED){
-    //Instantiate the secure client class as well as the http client
-    //Also print some debug messages
-    WiFiClientSecure secureClient;
     Serial.println("About to connect to server");
-    HTTPClient http;
-    secureClient.setInsecure();
-    Serial.println(("https://api.departureboard.io/api/v2.0/getDeparturesByCRS/"+stationCode+"/?apiKey=43962b41-cb16-4109-9018-88a7779a037c&numServices=2&serviceDetails=true").c_str());
+    Serial.println(("https://api.departureboard.io/api/v2.0/getDeparturesByCRS/"+stationCode+"/?apiKey=43962b41-cb16-4109-9018-88a7779a037c&numServices=1&serviceDetails=true").c_str());
     //Begin the http transaction to the server
-    http.begin(secureClient, ("https://api.departureboard.io/api/v2.0/getDeparturesByCRS/"+stationCode+"/?apiKey=43962b41-cb16-4109-9018-88a7779a037c&numServices=2&serviceDetails=true").c_str());
+    secureClient.setInsecure();
+    http.begin(secureClient, ("https://api.departureboard.io/api/v2.0/getDeparturesByCRS/"+stationCode+"/?apiKey=43962b41-cb16-4109-9018-88a7779a037c&numServices=1&serviceDetails=true").c_str());
     delay(500);
     int httpCode = http.GET();
 
     //If the transaction was successful then begin parsing the json document
     if (httpCode > 0){
       yield();
-      DynamicJsonDocument doc(15786);
-      DeserializationError err = deserializeJson(doc, http.getString());
+      DynamicJsonDocument doc(5120);
+      String data = http.getString();
+      Serial.println(data);
+      DeserializationError err = deserializeJson(doc, data);
+      data = "";
       yield();
       http.end();
       //Print debug messages if the deserialization was not completed successfully
