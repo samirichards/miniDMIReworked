@@ -17,11 +17,35 @@ Adafruit_SSD1306 display(OLED_RESET);
 //Settings for DMI
 const char* ssid = "Sami's iPhone";
 const char* password = "password101";
-std::string stationCode = "LIV";
+std::string stationCode = "RUN";
 //End of settings
 
 BearSSL::WiFiClientSecure secureClient;
 HTTPClient http;
+
+//Defining train service class
+class TrainService
+{
+private:
+    /* data */
+public:
+    String stationName;
+    String originStation;
+    String destination;
+    String operatorName;
+    String operatorCode;
+    String nrccMessage;
+    String platform;
+    String cancelReason;
+    String delayReason;
+    String std;
+    String etd;
+    String callingPoints;
+};
+
+//Allow this to be global so as to be accessible to any method which needs it
+//I was tempted to make this an array to have a provision for showing more services but that would complicate things and would be impossible anyway (not enough ram)
+TrainService service;
 
 //Methods to do with networking---------
 
@@ -73,10 +97,6 @@ bool getDepartures(){
         Serial.print(F("deserializeJson() failed with code "));
         Serial.println(err.c_str());
       }
-      //Print the location name for debug purposes
-      Serial.println(doc["locationName"].as<String>());
-      display.println(doc["locationName"].as<String>());
-      display.display();
       //Parsing code goes here
       //-----------------------------------------
       //TODO
@@ -108,6 +128,36 @@ bool getDepartures(){
 }
 
 //End of networking methods---------------
+
+void populateService(DynamicJsonDocument &input){
+  service.stationName = input["locationName"].as<String>();
+  Serial.println(service.stationName);
+  service.originStation = input["trainServices"]["0"]["origin"]["0"]["locationName"].as<String>();
+  Serial.println(service.originStation);
+  service.destination = input["trainServices"]["0"]["destination"]["0"]["locationName"].as<String>();
+  Serial.println(service.destination);
+  service.operatorName = input["trainServices"]["0"]["operator"].as<String>();
+  Serial.println(service.operatorName);
+  service.operatorCode = input["trainServices"]["0"]["operatorCode"].as<String>();
+  Serial.println(service.operatorCode);
+  service.nrccMessage = input["nrccMessages"]["0"]["message"].as<String>();
+  Serial.println(service.nrccMessage);
+  service.platform = input["trainServices"]["0"]["platform"].as<String>();
+  Serial.println(service.platform);
+  service.cancelReason = input["trainServices"]["0"]["cancelReason"].as<String>();
+  Serial.println(service.cancelReason);
+  service.delayReason = input["trainServices"]["0"]["delayReason"].as<String>();
+  Serial.println(service.delayReason);
+  service.std = input["trainServices"]["0"]["std"].as<String>();
+  Serial.println(service.std);
+  service.etd = input["trainServices"]["0"]["etd"].as<String>();
+  Serial.println(service.etd);
+  for (JsonArray::iterator it=input["trainServices"]["0"]["subsequentCallingPointsList"]["0"]["subsequentCallingPoints"].as<JsonArray>().begin(); it!=input["trainServices"]["0"]["subsequentCallingPointsList"]["0"]["subsequentCallingPoints"].as<JsonArray>().end(); ++it) {
+    service.callingPoints = service.callingPoints + it["locationName"].as<String>().c_str() + "(" + it["st"].as<String>().c_str() + "), ";
+    //NEED TO GET THIS CONCATINATION WORKING
+  }
+  Serial.println(Service.callingPoints);
+}
 
 
 void setup() {
