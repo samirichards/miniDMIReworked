@@ -1,0 +1,8 @@
+{
+    "sketch": "miniDMI.ino"
+    "port": "COM4",
+    "board": "LOLIN(WEMOS) D1 R2 & mini
+    "output": "../build",
+    "debugger": "jlink",
+    "prebuild": "bash prebuild.sh"
+}

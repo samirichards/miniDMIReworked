@@ -1,0 +1,68 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:\\Users\\samir\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\**",
+                "C:\\Users\\samir\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.6.1\\**",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\Adafruit_Circuit_Playground",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\Adafruit_GFX_Library",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\Adafruit_SSD1306",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\Arduino_Uno_WiFi_Dev_Ed_Library",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ArduinoBearSSL",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ArduinoECCX08",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ArduinoHttpClient",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ArduinoJson",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\DS3231",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ESP32httpUpdate",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ESP8266HTTPClient",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\esp8266wifi",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\HttpClient",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\SD",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\Streaming",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\WiFi101",
+                "E:\\Users\\samir\\Documents\\Arduino\\libraries\\WiFiClientSecure"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++20",
+            "browse": {
+                "path": [
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\Adafruit_Circuit_Playground",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\Adafruit_GFX_Library",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\Adafruit_SSD1306",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\Arduino_Uno_WiFi_Dev_Ed_Library",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ArduinoBearSSL",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ArduinoECCX08",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ArduinoHttpClient",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ArduinoJson",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\DS3231",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ESP32httpUpdate",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\ESP8266HTTPClient",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\esp8266wifi",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\HttpClient",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\SD",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\Streaming",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\WiFi101",
+                    "E:\\Users\\samir\\Documents\\Arduino\\libraries\\WiFiClientSecure",
+                    "E:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\SPI",
+                    "E:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\Wire",
+                    "E:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\SoftwareSerial",
+                    "E:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\HID",
+                    "E:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\EEPROM",
+                    "E:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries",
+                    "E:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino"
+                ]
+            },
+            "forcedInclude": []
+        }
+    ],
+    "version": 4
+}
