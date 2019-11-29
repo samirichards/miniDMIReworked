@@ -3,7 +3,6 @@
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 
-#define HTTP_TCP_BUFFER_SIZE (15786)
 #define _stackSize (6748/4)
 
 //Display specific libraries
