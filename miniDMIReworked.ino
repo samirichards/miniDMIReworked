@@ -2,8 +2,10 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
-
-#define _stackSize (6748/4)
+#include <DS3231.h> 
+#include <Streaming.h>
+#include <Wire.h>
+#include <TM1638lite.h>
 
 //Display specific libraries
 #include <Adafruit_GFX.h> 
@@ -17,11 +19,14 @@ Adafruit_SSD1306 display(OLED_RESET);
 //Settings for DMI
 const char* ssid = "Sami's iPhone";
 const char* password = "password101";
-std::string stationCode = "RUN";
+std::string stationCode = "SOP";
 //End of settings
 
 BearSSL::WiFiClientSecure secureClient;
 HTTPClient http;
+DS3231 rtc;
+struct DateTime t;
+TM1638lite tm(14, 12, 13);
 
 //Defining train service class
 class TrainService
@@ -110,6 +115,7 @@ bool getDepartures(){
       //I think that's it for now, I'm going to bed
       //END OF TODO
       //-----------------------------------------
+      populateService(doc);
       return true;
     }
     //If the transaction wasn't successful then print the error code and end the connection
@@ -117,12 +123,27 @@ bool getDepartures(){
       Serial.println("\n client.connect() returned");
       Serial.print(httpCode);
       http.end();
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(0, 0);
+      display.setTextWrap(false);
+      display.println("Connection failed");
+      display.print("Error code: ");
+      display.print(httpCode);
       return false;
     }
   }
   //Print debug information that the WiFi connection is not allive still
   else{
     Serial.println("Cannot run getDepartures, WiFi is no longer connected");
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.setTextWrap(false);
+    display.println("Lost connection");
+    display.println("Cannot get trains");
     return false;
   }
 }
@@ -132,33 +153,98 @@ bool getDepartures(){
 void populateService(DynamicJsonDocument &input){
   service.stationName = input["locationName"].as<String>();
   Serial.println(service.stationName);
-  service.originStation = input["trainServices"]["0"]["origin"]["0"]["locationName"].as<String>();
+  service.originStation = input["trainServices"][0]["origin"][0]["locationName"].as<String>();
   Serial.println(service.originStation);
-  service.destination = input["trainServices"]["0"]["destination"]["0"]["locationName"].as<String>();
+  service.destination = input["trainServices"][0]["destination"][0]["locationName"].as<String>();
   Serial.println(service.destination);
-  service.operatorName = input["trainServices"]["0"]["operator"].as<String>();
+  service.operatorName = input["trainServices"][0]["operator"].as<String>();
   Serial.println(service.operatorName);
-  service.operatorCode = input["trainServices"]["0"]["operatorCode"].as<String>();
+  service.operatorCode = input["trainServices"][0]["operatorCode"].as<String>();
   Serial.println(service.operatorCode);
-  service.nrccMessage = input["nrccMessages"]["0"]["message"].as<String>();
+  service.nrccMessage = input["nrccMessages"][0]["message"].as<String>();
   Serial.println(service.nrccMessage);
-  service.platform = input["trainServices"]["0"]["platform"].as<String>();
+  service.platform = input["trainServices"][0]["platform"].as<String>();
   Serial.println(service.platform);
-  service.cancelReason = input["trainServices"]["0"]["cancelReason"].as<String>();
+  service.cancelReason = input["trainServices"][0]["cancelReason"].as<String>();
   Serial.println(service.cancelReason);
-  service.delayReason = input["trainServices"]["0"]["delayReason"].as<String>();
+  service.delayReason = input["trainServices"][0]["delayReason"].as<String>();
   Serial.println(service.delayReason);
-  service.std = input["trainServices"]["0"]["std"].as<String>();
+  service.std = input["trainServices"][0]["std"].as<String>();
   Serial.println(service.std);
-  service.etd = input["trainServices"]["0"]["etd"].as<String>();
+  service.etd = input["trainServices"][0]["etd"].as<String>();
   Serial.println(service.etd);
-  for (JsonArray::iterator it=input["trainServices"]["0"]["subsequentCallingPointsList"]["0"]["subsequentCallingPoints"].as<JsonArray>().begin(); it!=input["trainServices"]["0"]["subsequentCallingPointsList"]["0"]["subsequentCallingPoints"].as<JsonArray>().end(); ++it) {
-    service.callingPoints = service.callingPoints + it["locationName"].as<String>().c_str() + "(" + it["st"].as<String>().c_str() + "), ";
-    //NEED TO GET THIS CONCATINATION WORKING
+  service.callingPoints = "";
+  for (int i = 0; i < input["trainServices"].getElement(0)["subsequentCallingPointsList"].getElement(0)["subsequentCallingPoints"].size(); i++) {
+    yield();
+    service.callingPoints = service.callingPoints + ", " + input["trainServices"].getElement(0)["subsequentCallingPointsList"].getElement(0)["subsequentCallingPoints"].getElement(i)["locationName"].as<String>();
   }
-  Serial.println(Service.callingPoints);
+  service.callingPoints.remove(0, 2);
+  Serial.println(service.callingPoints);
 }
 
+//Returns a string 20 chars wide from a given point in another string (Display can show 21 chars)
+String getWidth(String input, int point) {
+  if(point < 0){
+    return input.substring(0, 20);
+  }
+  else{
+    return input.substring(point, point + 20);
+  }
+}
+
+int line1Tick = 0;
+int line2Tick = 0;
+int line3Tick = 0;
+int line4Tick = 0;
+bool showAltServiceInfo = false;
+
+void displayInfo(){
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.setTextWrap(false);
+  if(service.destination != "null"){
+    display.println(service.destination);
+    if (showAltServiceInfo){
+      display.println(service.operatorName);
+    }
+    else{
+      display.print(service.std); display.print(" "); display.print(service.etd); display.print("\n");
+    }
+    display.println(getWidth("Calling at: " + service.callingPoints, line3Tick));
+
+  }
+  else{
+    display.println("Welcome to");
+    display.println(service.stationName);
+    display.println("");
+  }
+  if(service.nrccMessage != "null"){
+    display.println(getWidth(service.nrccMessage, line4Tick));
+  }
+  if(service.destination.length() > 20 && line1Tick < (service.destination.length() - 20)){
+    line1Tick++;
+  }
+  else{
+    line1Tick = 0;
+  }
+  
+  if(service.callingPoints.length() > 20 && line3Tick < (service.callingPoints.length())){
+    line3Tick++;
+  }
+  else{
+    line3Tick = 0;
+  }
+  
+  if(service.nrccMessage.length() > 20 && line4Tick < (service.nrccMessage.length())){
+    line4Tick++;
+  }
+  else{
+    line4Tick = 0;
+  }
+  display.display();
+}
 
 void setup() {
   // -- OLED -------------
@@ -172,12 +258,27 @@ void setup() {
   display.setCursor(0, 0);
   display.setTextWrap(false);
   // a line is 21 chars in this size
+
+  Wire.begin();
   
   connectToNetwork();
   getDepartures();
+  tm.reset();
+  for (int i = 0; i < 8; i++){
+      tm.setLED(i, 1);
+      delay(100);
+  }
+  for (int i = 0; i < 8; i++){
+      tm.setLED(i, 0);
+      delay(100);
+  }
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  for (int i = 0; i < 100; i++){
+    delay(100);
+    displayInfo();
+  }
+  getDepartures();
+  showAltServiceInfo = !showAltServiceInfo;
 }
